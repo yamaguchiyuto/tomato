@@ -2,10 +2,7 @@
 
 import sys
 import math
-import time
-import json
 from lib.db import DBAdaptor
-import lib.util as util
 
 def norm_pdf(x, mean, var):
     """ avoiding the case var = 0 """
