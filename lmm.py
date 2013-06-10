@@ -2,6 +2,7 @@
 
 import sys
 import math
+import json
 from lib.db import DBAdaptor
 
 def norm_pdf(x, mean, var):
@@ -53,10 +54,9 @@ p0 = float(sys.argv[2])
 
 user_size = 10
 users = db.get_users(user_size)
+results = {'c0': c0, 'results': []}
 for user_id in users:
     lmm = make_lmm(user_id, c0, db)
-    inferred_location, confidence = find_mode(lmm, p0)
-    if (inferred_location == None) or (confidence < p0):
-        print (-1,-1)
-    else:
-        print inferred_location
+    inferred_location, confidence = find_mode(lmm)
+    results['results'].append({'user_id': user_id, 'inferred_location': inferred_location, 'confidence': confidence, 'actual_location': (users[user_id]['latitude'], users[user_id]['longitude'])})
+print json.dumps(results)

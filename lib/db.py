@@ -59,35 +59,35 @@ class DBAdaptor:
         results = self.issue_select(query)
         users = {}
         for result in results:
-            users[result['id'] = result
+            users[result['id']] = result
         return users
     def get_labeled_users(self, n):
         query = "SELECT * FROM users WHERE latitude is not null LIMIT %s" % n 
         results = self.issue_select(query)
         users = {}
         for result in results:
-            users[result['id'] = result
+            users[result['id']] = result
         return users
 
     def insert_dominance(self, user_id, dominance_type, n, mean, variance):
-        query = "INSERT INTO dominance VALUES (%s, %s, %s, %s, %s, %s)" % (user_id, dominance_type, n, mean[0], mean[1], variance)
+        query = "INSERT INTO dominance VALUES (%s, %s, %s, %s, %s, %s)" % (user_id, dominance_type, n, variance, mean[0], mean[1])
         self.issue_insert(query)
 
-    def get_neighbors_dominane_distributions(self, user_id, f0):
+    def get_neighbors_dominance_distributions(self, user_id, f0):
         """ get in-dominance distributions """
         in_dominance_distributions = []
-        in_query = "select points, variance, latitude, longitude from graph, dominance where src_id = %s and dst_id = dominance.id and type = 1 and points > %s" % (user_id, f0)
+        in_query = "select centrality, variance, latitude, longitude from graph, dominance where src_id = %s and dst_id = dominance.id and type = 1 and centrality > %s" % (user_id, f0)
         results = self.issue_select(in_query)
         for result in results:
-            entry = {'centrality': result['points'], 'variance': result['variance'], 'center': (result['latitude'], result['longitude'])}
+            entry = {'centrality': result['centrality'], 'variance': result['variance'], 'center': (result['latitude'], result['longitude'])}
             in_dominance_distributions.append(entry)
 
         """ get out-dominance distributions """
         out_dominance_distributions = []
-        out_query = "select src_id as id, points, variance, latitude, longitude from graph, dominance where dst_id = %s and src_id = dominance.id and type = 0 and points > %s" % (user_id, f0)
+        out_query = "select centrality, variance, latitude, longitude from graph, dominance where dst_id = %s and src_id = dominance.id and type = 0 and centrality > %s" % (user_id, f0)
         results = self.issue_select(out_query)
         for result in results:
-            entry = {'centrality': result['points'], 'variance': result['variance'], 'center': (result['latitude'], result['longitude'])}
+            entry = {'centrality': result['centrality'], 'variance': result['variance'], 'center': (result['latitude'], result['longitude'])}
             out_dominance_distributions.append(entry)
 
         return (in_dominance_distributions, out_dominance_distributions)
