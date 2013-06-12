@@ -53,7 +53,8 @@ Usage
     +-------------+--------------+------+-----+---------+-------+
 
 ### Prepare db.conf ###
-``db.conf`` is used by ``lib/db.py`` to connect to DB
+``db.conf`` is used by ``lib/db.py`` to connect to DB.
+
     $ cat tomato/data/db.conf
     hostname
     dbusername
