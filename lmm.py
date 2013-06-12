@@ -40,17 +40,14 @@ def make_lmm(user_id, c0, db):
         
     return lmm
 
-if len(sys.argv) < 3:
-    print "[USAGE]: python %s [c0] [p0]" % sys.argv[0]
+if len(sys.argv) < 2:
+    print "[USAGE]: python %s [c0]" % sys.argv[0]
     exit()
 
 db = DBAdaptor()
 
 """ threshold value of centrality constraint """
 c0 = float(sys.argv[1])
-
-""" threshold value of confidence constraint """
-p0 = float(sys.argv[2])
 
 user_size = 10
 users = db.get_users(user_size)

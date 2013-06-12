@@ -1,59 +1,80 @@
-プロジェクト・タイトル
+Landmark-Based User Location Inference
 ======================
-ここにプロジェクトの概要を書きます。
-行末にスペースを2つ入れると
-改行されます。
- 
-段落を分けるには、[空行](http://example.com/) を入れます。
- 
-使い方
+An implementation of a user location inference method.  
+If you want to know more, please refer to our paper.
+
+Usage
 ------
-### インライン ###
-インラインのコードは、**バッククォート** (`` ` ``) で囲みます。
- 
-### ブロックレベル ###
-    function f () {
-        alert(0);  /* 先頭に4文字のスペース、
-                      もしくはタブを挿入します */
+### Prepare DB ###
+    $ mysql -u username -p
+    mysql> create database dbname;
+    mysql> quit;
+    Bye
+    $ mysql -u username -p dbname < tomato/sql/tomato.sql
+
+### Structures of tables ###
+    mysql> show tables;
+    +-------------------+
+    | Tables_in_tomato2 |
+    +-------------------+
+    | dominance         |
+    | graph             |
+    | users             |
+    +-------------------+
+
+    mysql> show fields from dominance;
+    +------------+------------+------+-----+---------+-------+
+    | Field      | Type       | Null | Key | Default | Extra |
+    +------------+------------+------+-----+---------+-------+
+    | id         | bigint(20) | NO   | PRI | 0       |       |
+    | type       | int(11)    | NO   | PRI | 0       |       |
+    | centrality | float      | YES  |     | NULL    |       |
+    | variance   | float      | YES  |     | NULL    |       |
+    | latitude   | float      | YES  |     | NULL    |       |
+    | longitude  | float      | YES  |     | NULL    |       |
+    +------------+------------+------+-----+---------+-------+
+
+    mysql> show fields from graph;
+    +--------+------------+------+-----+---------+-------+
+    | Field  | Type       | Null | Key | Default | Extra |
+    +--------+------------+------+-----+---------+-------+
+    | src_id | bigint(20) | NO   | PRI | 0       |       |
+    | dst_id | bigint(20) | NO   | PRI | 0       |       |
+    +--------+------------+------+-----+---------+-------+
+
+    mysql> show fields from users;
+    +-------------+--------------+------+-----+---------+-------+
+    | Field       | Type         | Null | Key | Default | Extra |
+    +-------------+--------------+------+-----+---------+-------+
+    | id          | bigint(20)   | NO   | PRI | 0       |       |
+    | screen_name | varchar(100) | YES  |     | NULL    |       |
+    | latitude    | float        | YES  |     | NULL    |       |
+    | longitude   | float        | YES  |     | NULL    |       |
+    +-------------+--------------+------+-----+---------+-------+
+
+### Prepare db.conf ###
+``db.conf`` is used by ``lib/db.py`` to connect to DB
+    $ cat tomato/data/db.conf
+    hostname
+    dbusername
+    dbpassword
+    dbname
+
+### Calculate dominance distribution of all users ###
+    $ python calculate_dominance_distribution.py
+Results are inserted into ``dominance`` table.
+
+### Infer ###
+    $ python lmm.py [c0]  # c0 is a threshold value of the centrality constraint.
+Results are printed out to stdout.
+
+Output
+------
+### Output format ###
+    {'user_id': 481102014,
+     'inferred_location': (36.056, 140.026),
+     'confidence': 0.045,
+     'actual_location': (36.086, 140.078)
     }
- 
-パラメータの解説
-----------------
-リストの間に空行を挟むと、それぞれのリストに `<p>` タグが挿入され、行間が
-広くなります。
- 
-    def MyFunction(param1, param2, ...)
- 
-+   `param1` :
-    _パラメータ1_ の説明
- 
-+   `param2` :
-    _パラメータ2_ の説明
- 
-関連情報
---------
-### リンク、ネストしたリスト
-1. [リンク1](http://example.com/ "リンクのタイトル")
-    * ![画像1](http://github.com/unicorn.png "画像のタイトル")
-2. [リンク2][link]
-    - [![画像2][image]](https://github.com/)
- 
-  [link]: http://example.com/ "インデックス型のリンク"
-  [image]: http://github.com/github.png "インデックス型の画像"
- 
-### 引用、ネストした引用
-> これは引用です。
->
-> > スペースを挟んで `>` を重ねると、引用の中で引用ができますが、
-> > GitHubの場合、1行前に空の引用が無いと、正しくマークアップされません。
- 
-ライセンス
-----------
-Copyright &copy; 2011 xxxxxx
-Licensed under the [Apache License, Version 2.0][Apache]
-Distributed under the [MIT License][mit].
-Dual licensed under the [MIT license][MIT] and [GPL license][GPL].
- 
-[Apache]: http://www.apache.org/licenses/LICENSE-2.0
-[MIT]: http://www.opensource.org/licenses/mit-license.php
-[GPL]: http://www.gnu.org/licenses/gpl.html
+If a user's actual location is unknown, ``actual_location`` value is ``None``.  
+``confidence`` indicates how likely the corresponding user's home location is at ``inferred_location``.
