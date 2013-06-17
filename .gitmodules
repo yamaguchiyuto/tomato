@@ -1,0 +1,3 @@
+[submodule "geocoder"]
+	path = geocoder
+	url = git@github.com:yamaguchiyuto/geocoder.git
